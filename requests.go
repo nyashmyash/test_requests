@@ -33,7 +33,7 @@ func send_req_filter(cookie *http.Cookie) map[string]interface{} {
 		fmt.Println("Error read request:", err)
 		return nil
 	}
-	fmt.Println(string(body))
+	//fmt.Println(string(body))
 
 	resp_data := make(map[string]interface{})
 
@@ -46,17 +46,32 @@ func send_req_filter(cookie *http.Cookie) map[string]interface{} {
 }
 func send_data(data map[string]interface{}) {
 	rows := get_rows(data)
+	// for _, value := range rows {
+	// 	jsonData, err := json.Marshal(value)
+	// 	if err != nil {
+	// 	}
+	// 	var rdata = req_data{time: get_time(value), user: get_user(value), comment: string(jsonData)}
+	// 	send_data_row(rdata)
+	// }
+	jsonData, err := json.Marshal(rows[0])
+	if err != nil {
+	}
+	var rdata = req_data{time: get_time(rows[0]), user: get_user(rows[0]), comment: string(jsonData)}
+	send_data_row(rdata)
+}
+func print_data(data map[string]interface{}) {
+	rows := get_rows(data)
 	for _, value := range rows {
 		jsonData, err := json.Marshal(value)
 		if err != nil {
 		}
 		var rdata = req_data{time: get_time(value), user: get_user(value), comment: string(jsonData)}
-		send_data_row(rdata)
+		fmt.Println(rdata)
 	}
 }
 func send_data_row(rdata req_data) {
 	form := make_form(rdata)
-	fmt.Println(form)
+	//fmt.Println(form)
 	req, err := http.NewRequest("POST", "https://development.kpi-drive.ru/_api/facts/save_fact", bytes.NewBuffer([]byte(form)))
 	if err != nil {
 		fmt.Println("Error create request to POST data:", err)
