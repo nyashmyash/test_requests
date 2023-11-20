@@ -6,6 +6,12 @@ import (
 	"strings"
 )
 
+type req_data struct {
+	time    string
+	comment string
+	user    string
+}
+
 func make_filter() string {
 	filter_data := map[string]interface{}{
 		"filter": map[string]interface{}{
@@ -27,13 +33,17 @@ func make_filter() string {
 	}
 	return string(jsonData)
 }
+func get_rows(data interface{}) []interface{} {
+	DATA_ := data.(map[string]interface{})["DATA"].(map[string]interface{})
+	return DATA_["rows"].([]interface{})
+}
 
-func get_user(row map[string]interface{}) string {
-	author := row["author"].(map[string]interface{})
+func get_user(row interface{}) string {
+	author := row.(map[string]interface{})["author"].(map[string]interface{})
 	return author["user_name"].(string)
 }
-func get_time(row map[string]interface{}) string {
-	return row["time"].(string)
+func get_time(row interface{}) string {
+	return row.(map[string]interface{})["time"].(string)
 }
 
 func get_params(row map[string]interface{}) string {
@@ -45,7 +55,7 @@ func get_params(row map[string]interface{}) string {
 	return string(jsonData)
 }
 
-func make_form(time string, comment string, user string) string {
+func make_form(req req_data) string {
 	form := url.Values{}
 	form.Add("period_start", "2023-09-01")
 	form.Add("period_end", "2023-09-30")
@@ -53,11 +63,11 @@ func make_form(time string, comment string, user string) string {
 	form.Add("indicator_to_mo_id", "315914")
 	form.Add("indicator_to_mo_fact_id", "0")
 	form.Add("value", "1")
-	form.Add("fact_time", strings.Split(time, "T")[0])
+	form.Add("fact_time", strings.Split(req.time, "T")[0])
 	form.Add("is_plan", "0")
-	form.Add("supertags", "[{\"tag\":{\"id\":2,\"name\":\"Клиент\",\"key\":\"client\",\"values_source\":0},\"value\":\""+user+"\"}]") //:[{"tag":{"id":2,"name":"Клиент","key":"client","values_source":0},"value":"Иванов И. И."}]
+	form.Add("supertags", "[{\"tag\":{\"id\":2,\"name\":\"Клиент\",\"key\":\"client\",\"values_source\":0},\"value\":\""+req.user+"\"}]") //:[{"tag":{"id":2,"name":"Клиент","key":"client","values_source":0},"value":"Иванов И. И."}]
 	form.Add("auth_user_id", "40")
-	form.Add("comment", comment)
+	form.Add("comment", req.comment)
 	return form.Encode()
 }
 func get_supertags(user string) string {

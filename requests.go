@@ -44,17 +44,18 @@ func send_req_filter(cookie *http.Cookie) map[string]interface{} {
 	}
 	return resp_data
 }
-
 func send_data(data map[string]interface{}) {
-
-	DATA_ := data["DATA"].(map[string]interface{})
-	allrows := DATA_["rows"].([]interface{})
-	row := allrows[0].(map[string]interface{})
-	time := get_time(row)
-	comment := get_params(row)
-	user := get_user(row)
-	supertags := get_supertags(user)
-	form := make_form(time, comment, supertags)
+	rows := get_rows(data)
+	for _, value := range rows {
+		jsonData, err := json.Marshal(value)
+		if err != nil {
+		}
+		var rdata = req_data{time: get_time(value), user: get_user(value), comment: string(jsonData)}
+		send_data_row(rdata)
+	}
+}
+func send_data_row(rdata req_data) {
+	form := make_form(rdata)
 	fmt.Println(form)
 	req, err := http.NewRequest("POST", "https://development.kpi-drive.ru/_api/facts/save_fact", bytes.NewBuffer([]byte(form)))
 	if err != nil {
